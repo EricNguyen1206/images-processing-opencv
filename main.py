@@ -1,59 +1,80 @@
-import numpy as np
 import cv2
-import matplotlib.pyplot as plt
+import imutils
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import *
+from PIL import ImageTk
+import PIL
+import cv2
+
+from contrast_stretching import contrast_stretching
+from face_detection import face_detect
+from face_recognition import face_recognition
+
+def get_image_from_dialog():
+  pass
+
+#initialise GUI
+top=tk.Tk()
+top.geometry('800x600')
+top.title('Face recognition')
+top.configure(background='#CDCDCD')
+
+label=Label(top,background='#CDCDCD', font=('Roboto',15,'bold'))
+sign_image = Label(top)
+
+def show_classify_button(file_path):
+    classify_b = Button(top,text="Recognition faces",command=lambda: classify(file_path),padx=10,pady=5)
+    classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b.place(relx=0.79,rely=0.46)
+
+def upload_image():
+    try:
+        file_path=filedialog.askopenfilename()
+        uploaded=PIL.Image.open(file_path)
+        uploaded.thumbnail(((top.winfo_width()/2.25),(top.winfo_height()/2.25)))
+        im=ImageTk.PhotoImage(uploaded)
+
+        sign_image.configure(image=im)
+        sign_image.image=im
+        label.configure(text='')
+        show_classify_button(file_path)
+    except:
+        pass
+
+def classify(file_path):
+  # read and resize image
+  img = cv2.imread(file_path)
+  img = imutils.resize(img, width=500)
+
+  # contrast stretching and de-noise
+  new_img = contrast_stretching(img)
+  cv2.imshow('new_img', new_img)
+
+  # edge detection
+
+  # face detection
+  coordinator_list, img = face_detect(img)
+
+  # face recognition
+  face_recognition(coordinator_list, img)
+  # label.configure(foreground='#011638', text=sign) 
+  
+  sign_image.configure(image=img)
+  sign_image.image=img
+  #
 
 
-def tinh_hist(img):
-    hist = np.zeros((256,), np.uint8)  # tạo mảng để thống kê số lượng pixel cho từng mức sáng
-    h, w = img.shape[:2]  # lấy số đo của ảnh
-    for i in range(h):
-        for j in range(w):
-            hist[img[i][j]] += 1
-    return hist
+if __name__ == '__main__':
+  upload=Button(top,text="Upload an image",command=upload_image,padx=10,pady=5)
+  upload.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+
+  upload.pack(side=BOTTOM,pady=50)
+  sign_image.pack(side=BOTTOM,expand=True)
+  label.pack(side=BOTTOM,expand=True)
+  heading = Label(top, text="Face_recognition",pady=20, font=('arial',20,'bold'))
+  heading.configure(background='#CDCDCD',foreground='#364156')
+  heading.pack()
+  top.mainloop()
 
 
-def can_bang_hist(hist):
-    trans = np.zeros_like(hist, np.float64)
-    for i in range(len(trans)):
-        trans[i] = hist[:i].sum()
-    new_hist = (trans - trans.min()) / (trans.max() - trans.min()) * 255
-    new_hist = np.uint8(new_hist)
-    return new_hist
-
-
-def face_detect(img):
-    # load cascade
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-
-    # chuyển thành ảnh xám
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # nhận diện
-    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-
-    # vẽ hình vuông nhận diện
-    for (x, y, w, h) in faces:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    return img
-
-
-
-
-img = cv2.imread("d.png")
-
-hist = tinh_hist(img).ravel()
-new_hist = can_bang_hist(hist)
-
-h, w = img.shape[:2]
-for i in range(h):
-    for j in range(w):
-        img[i, j] = new_hist[img[i, j]]
-
-
-fig = plt.figure()
-ax = plt.subplot(121)
-plt.imshow(img)
-
-plt.subplot(122)
-plt.plot(new_hist)
-plt.show()
