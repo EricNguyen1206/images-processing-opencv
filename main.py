@@ -1,4 +1,5 @@
 import cv2
+from cv2 import denoise_TVL1
 import imutils
 import tkinter as tk
 from tkinter import filedialog
@@ -7,12 +8,12 @@ from PIL import ImageTk
 import PIL
 import cv2
 
+from noise_reduce import noise_reduce
+from data_processing import adjust_gamma, sharping
 from contrast_stretching import contrast_stretching
 from face_detection import face_detect
 from face_recognition import face_recognition
-
-def get_image_from_dialog():
-  pass
+from edge_detection import edge_detect
 
 #initialise GUI
 top=tk.Tk()
@@ -24,9 +25,26 @@ label=Label(top,background='#CDCDCD', font=('Roboto',15,'bold'))
 sign_image = Label(top)
 
 def show_classify_button(file_path):
-    classify_b = Button(top,text="Recognition faces",command=lambda: classify(file_path),padx=10,pady=5)
-    classify_b.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-    classify_b.place(relx=0.79,rely=0.46)
+    rel_x_root = 0.79
+    rel_y_root = 0.26
+
+    classify_b_none = Button(top,text="Normal",command=lambda: classify(file_path, None),padx=10,pady=5)
+    classify_b_bilateral = Button(top,text="Bilateral", command=lambda: classify(file_path, 'gauss'),padx=10,pady=5)
+    classify_b_median = Button(top,text="Median",command=lambda: classify(file_path, 's&p'),padx=10,pady=5)
+    classify_b_mean = Button(top,text="Mean",command=lambda: classify(file_path, 'mean'),padx=10,pady=5)
+
+
+    classify_b_none.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b_none.place(relx=rel_x_root,rely=rel_y_root)
+
+    classify_b_bilateral.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b_bilateral.place(relx=rel_x_root, rely=rel_y_root+0.1)
+
+    classify_b_median.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b_median.place(relx=rel_x_root, rely=rel_y_root+0.2)
+
+    classify_b_mean.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b_mean.place(relx=rel_x_root, rely=rel_y_root+0.3)
 
 def upload_image():
     try:
@@ -37,32 +55,53 @@ def upload_image():
 
         sign_image.configure(image=im)
         sign_image.image=im
-        label.configure(text='')
+        label.configure(text='Origin image')
+
         show_classify_button(file_path)
     except:
         pass
 
-def classify(file_path):
+def classify(file_path, noise_type):
   # read and resize image
-  img = cv2.imread(file_path)
-  img = imutils.resize(img, width=500)
+  img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
+  img = imutils.resize(img, height=500)
+
+
+  # noise reduction
+  denoise_img = noise_reduce(noise_type, img)
+
+  # adjust brightness
+  denoise_img = adjust_gamma(denoise_img, 1)
 
   # contrast stretching and de-noise
-  new_img = contrast_stretching(img)
-  cv2.imshow('new_img', new_img)
+  contrast_stretching_img = contrast_stretching(denoise_img)
+
+  # sharping 
+  # sharping_img = sharping(denoise_img)
+
+  cv2.imshow('img after de-noising and sharping', contrast_stretching_img)
 
   # edge detection
+  edge_img = edge_detect(contrast_stretching_img) 
+
+  cv2.imshow('edge detection img', edge_img)
 
   # face detection
-  coordinator_list, img = face_detect(img)
+  coordinator_list, face_detect_img = face_detect(contrast_stretching_img)
+
+  cv2.imshow('face detection img', face_detect_img)
 
   # face recognition
-  face_recognition(coordinator_list, img)
-  # label.configure(foreground='#011638', text=sign) 
-  
-  sign_image.configure(image=img)
-  sign_image.image=img
-  #
+  face_recognition_img = face_recognition(coordinator_list, face_detect_img)
+
+  # show result
+  # sign_image.configure(image=face_recognition_img)
+  # sign_image.image=face_recognition_img
+  # label.configure(text='Final image')
+
+  cv2.imshow('face recognition img', face_recognition_img)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
