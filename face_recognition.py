@@ -18,6 +18,9 @@ def face_recognition(faces_detect, rect_img):
 
     name = model.predict([fd])[0]
 
+    print('confidence: {}'.format(model.predict_proba([fd])))
+    print('decision: {}'.format(model.decision_function([fd])))
+
     cv2.putText(rect_img, name, (x, y_end+12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
   return rect_img

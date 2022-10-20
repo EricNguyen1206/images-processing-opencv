@@ -29,10 +29,10 @@ def show_classify_button(file_path):
     rel_y_root = 0.26
 
     classify_b_none = Button(top,text="Normal",command=lambda: classify(file_path, None),padx=10,pady=5)
-    classify_b_bilateral = Button(top,text="Bilateral", command=lambda: classify(file_path, 'gauss'),padx=10,pady=5)
+    classify_b_bilateral = Button(top,text="Bilateral", command=lambda: classify(file_path, 'bilateral'),padx=10,pady=5)
     classify_b_median = Button(top,text="Median",command=lambda: classify(file_path, 's&p'),padx=10,pady=5)
     classify_b_mean = Button(top,text="Mean",command=lambda: classify(file_path, 'mean'),padx=10,pady=5)
-
+    classify_b_gauss = Button(top,text="Gaussian",command=lambda: classify(file_path, 'gauss'),padx=10,pady=5)
 
     classify_b_none.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     classify_b_none.place(relx=rel_x_root,rely=rel_y_root)
@@ -43,8 +43,11 @@ def show_classify_button(file_path):
     classify_b_median.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
     classify_b_median.place(relx=rel_x_root, rely=rel_y_root+0.2)
 
+    classify_b_gauss.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
+    classify_b_gauss.place(relx=rel_x_root, rely=rel_y_root+0.3)
+
     classify_b_mean.configure(background='#364156', foreground='white',font=('arial',10,'bold'))
-    classify_b_mean.place(relx=rel_x_root, rely=rel_y_root+0.3)
+    classify_b_mean.place(relx=rel_x_root, rely=rel_y_root+0.4)
 
 def upload_image():
     try:

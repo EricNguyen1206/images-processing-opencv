@@ -6,11 +6,14 @@ from imutils import paths
 
 
 def predict(file):
-  fd, image, _  = get_feature(file)
+  img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+
+  fd, image, _  = get_feature(img, tracking=False)
 
   name_predict = model.predict([fd])[0]
 
   image = imutils.resize(image, width=200)
+
   cv2.putText(image, name_predict, (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
   cv2.imshow('predicted image', image)
   cv2.waitKey(300)

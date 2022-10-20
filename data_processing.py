@@ -45,8 +45,8 @@ def get_feature(img, tracking=True):
     )
   return result[0], image, result[1]
 
-def extract_feature():
-  imagePath = list(paths.list_images('preprocessing_image'))
+def extract_feature(f_name, tracking=True):
+  imagePath = list(paths.list_images(f_name))
   data = []
   labels = []
 
@@ -61,7 +61,7 @@ def extract_feature():
 
     img = cv2.imread(ip, cv2.IMREAD_UNCHANGED) #Read image
 
-    fd = np.array(get_feature(img)[0])
+    fd = np.array(get_feature(img, tracking)[0])
 
     data.append(fd)
     labels.append(name)

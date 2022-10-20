@@ -14,11 +14,13 @@ def noise_reduce(type, img):
   de_noise_img = None
 
   if type == 'gauss' or type == 'poisson':
-    de_noise_img = cv2.bilateralFilter(src=img, d=5, sigmaColor=30, sigmaSpace=20)
+    de_noise_img = cv2.GaussianBlur(src=img, ksize=(3, 3), sigmaX=3, sigmaY=3)
   elif type == 's&p':
     de_noise_img = cv2.medianBlur(src=img, ksize=3)
+  elif type == 'bilateral':
+    de_noise_img = cv2.bilateralFilter(src=img, d=5, sigmaColor=10, sigmaSpace=30)
   elif type == 'mean':
-    de_noise_img = cv2.fastNlMeansDenoisingColored(img, None, 5, 3, 7, 7)
+    de_noise_img = cv2.fastNlMeansDenoisingColored(src=img, h=5, hColor=3, templateWindowSize=7, searchWindowSize=7)
 
   return de_noise_img
 
